@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🔍 내 구매 내역</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .rank-1 { color: gold; font-weight: bold; }
+        .rank-0 { color: #aaa; }
+    </style>
+</head>
+<body>
+    <h1>🔍 내 복권 구매 내역 / 당첨 확인</h1>
+    <a href="{% url 'lobby' %}">⬅️ 로비로 돌아가기</a>
+    <hr>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: green; font-weight: bold;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if tickets %}
+        <table>
+            <thead>
+                <tr>
+                    <th>구매 일시</th>
+                    <th>방식</th>
+                    <th>선택한 번호</th>
+                    <th>당첨 확인</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.purchased_at }}</td>
+                    <td><strong>{{ ticket.get_mode_display }}</strong></td>
+                    <td>{{ ticket.get_numbers }}</td>
+                    <td>
+                        {% if ticket.is_checked %}
+                            {% if ticket.rank == 0 %} <span class="rank-0">❌ 낙첨</span>
+                            {% else %} <span class="rank-1">🎉 {{ ticket.rank }}등 당첨!</span>
+                            {% endif %}
+                        {% else %}
+                            <form method="post" style="margin:0;">
+                                {% csrf_token %}
+                                <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+                                <button type="submit" style="background:#dc3545; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:3px;">당첨 확인하기</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>아직 구매하신 복권 내역이 없습니다. 첫 복권을 구매해 보세요!</p>
+    {% endif %}
+</body>
+</html>

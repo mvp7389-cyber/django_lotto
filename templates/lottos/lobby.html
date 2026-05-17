@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>6/45 로또 시스템</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .box { padding: 20px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 5px; max-width: 400px; }
+        .ball { display: inline-block; width: 40px; height: 40px; border-radius: 50%; background: #ffc107; text-align: center; line-height: 40px; font-weight: bold; margin-right: 5px; color: #fff; }
+        .bonus { background: #6c757d; }
+        .wallet { background: #e3f2fd; padding: 15px; border-radius: 5px; display: inline-block; margin-bottom: 20px; border: 1px solid #90caf9; }
+    </style>
+</head>
+<body>
+    <h1>🎯 6/45 로또 메인 시스템</h1>
+
+    <div class="wallet">
+        💰 현재 내 보유 자산: <strong>{{ balance|default:50000 }}원</strong>
+        <a href="{% url 'charge_money' %}" style="margin-left: 15px; background: #007bff; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 13px;">⚡ 머니 무료 충전 (+1만)</a>
+    </div>
+
+    <div class="nav">
+        <a href="{% url 'buy_lotto' %}">🎫 복권 구매</a>
+        <a href="{% url 'my_tickets' %}">🔍 내 구매 내역 / 당첨 확인</a>
+        {% if user.is_staff %}
+            <a href="{% url 'admin_dashboard' %}" style="color: red;">📊 로또 시스템 관리자 대시보드</a>
+        {% endif %}
+    </div>
+    <hr>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: #28a745; font-weight: bold;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    <h2>📢 최근 추첨 결과</h2>
+    {% if latest_round %}
+        <div class="box">
+            <h3>제 {{ latest_round.round_number }}회 당첨 번호</h3>
+            <span class="ball">{{ latest_round.num1 }}</span>
+            <span class="ball">{{ latest_round.num2 }}</span>
+            <span class="ball">{{ latest_round.num3 }}</span>
+            <span class="ball">{{ latest_round.num4 }}</span>
+            <span class="ball">{{ latest_round.num5 }}</span>
+            <span class="ball">{{ latest_round.num6 }}</span>
+            <span> + 보너스 </span>
+            <span class="ball bonus">{{ latest_round.bonus }}</span>
+            <p style="font-size: 12px; color: #888;">추첨 일시: {{ latest_round.created_at }}</p>
+        </div>
+    {% else %}
+        <p>아직 진행된 추첨이 없습니다. 관리자 대시보드에서 첫 추첨을 가동해주세요!</p>
+    {% endif %}
+</body>
+</html>

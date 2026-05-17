@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # 1. 데이터베이스 컨테이너 (PostgreSQL)
+  db:
+    image: postgres:16-alpine
+    container_name: lotto_db
+    environment:
+      POSTGRES_DB: lotto_db
+      POSTGRES_USER: lotto_user
+      POSTGRES_PASSWORD: lotto_password123!
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. 웹 애플리케이션 컨테이너 (Django)
+  web:
+    build: .
+    container_name: lotto_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=lotto_db
+      - DB_USER=lotto_user
+      - DB_PASSWORD=lotto_password123!
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

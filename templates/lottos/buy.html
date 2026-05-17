@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🎫 복권 구매</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        .grid { display: block; margin: 20px 0; max-width: 350px; }
+        .num-btn { 
+            display: inline-block; width: 40px; height: 40px; 
+            text-align: center; line-height: 40px; border: 1px solid #ccc; 
+            cursor: pointer; font-weight: bold; margin: 4px; border-radius: 4px;
+            background: #fff; user-select: none;
+        }
+        .num-btn.selected { background-color: #007bff; color: white; border-color: #0056b3; }
+        .btn-submit { padding: 10px 20px; font-weight: bold; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🎫 6/45 복권 구매</h1>
+    <a href="{% url 'lobby' %}" style="text-decoration: none; color: #007bff; font-weight: bold;">⬅️ 로비로 돌아가기</a>
+    <hr>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: {% if message.tags == 'error' %}red{% else %}green{% endif %}; font-weight: bold;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    <h3>🤖 1. 자동 선택으로 구매</h3>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="AUTO">
+        <button type="submit" class="btn-submit" style="background: #28a745;">자동 1게임 구매하기</button>
+    </form>
+
+    <br><hr><br>
+
+    <h3>✍️ 2. 수동 선택으로 구매</h3>
+    <p>아래 마킹 보드에서 번호 6개를 골라주세요.</p>
+    <form method="post" id="manual-form" onsubmit="return validateForm()">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="MANUAL">
+        
+        <div class="grid" id="lotto-board"></div>
+        
+        <div id="hidden-inputs"></div>
+        <button type="submit" class="btn-submit" style="background: #007bff; margin-top: 15px;">수동 1게임 구매하기</button>
+    </form>
+
+    <script>
+        // 1부터 45까지 보드 그리기
+        const board = document.getElementById('lotto-board');
+        let selectedNumbers = new Set();
+
+        for (let i = 1; i <= 45; i++) {
+            const btn = document.createElement('div');
+            btn.className = 'num-btn';
+            btn.innerText = i;
+            btn.onclick = function() {
+                if (selectedNumbers.has(i)) {
+                    selectedNumbers.delete(i);
+                    btn.classList.remove('selected');
+                } else {
+                    if (selectedNumbers.size >= 6) { alert('최대 6개까지만 선택할 수 있습니다.'); return; }
+                    selectedNumbers.add(i);
+                    btn.classList.add('selected');
+                }
+            };
+            board.appendChild(btn);
+        }
+
+        function validateForm() {
+            if (selectedNumbers.size !== 6) { alert('반드시 6개의 숫자를 선택해야 합니다.'); return false; }
+            const container = document.getElementById('hidden-inputs');
+            container.innerHTML = '';
+            
+            let idx = 1;
+            // 오름차순 정렬 후 전송
+            Array.from(selectedNumbers).sort((a,b) => a-b).forEach(num => {
+                let input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `num_${idx}`;
+                input.value = num;
+                container.appendChild(input);
+                idx++;
+            });
+            return true;
+        }
+    </script>
+</body>
+</html>
